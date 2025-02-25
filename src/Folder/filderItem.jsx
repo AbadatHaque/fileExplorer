@@ -1,71 +1,89 @@
-/* eslint-disable react/prop-types */
 import { useState } from "react";
-// import reactLogo from './assets/react.svg'
-import folderLogo from '../assets/folder.png'
-import fileLogo from '../assets/file.png'
-import '../App.css'
+import { Input, Button, Space, Collapse, Typography } from "antd";
+import { FolderOutlined, FileOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import "../App.css";
 
+const { Text } = Typography;
+const { Panel } = Collapse;
 
-const FolderItem = ({data,HandelAdd,handelDelete,handelEdit}) => {
-    const [isOpen, setIsOpen] = useState(false)
-    const [isShowAddInput, setISShowAddInput] = useState(false)
-    const [inputVal, setInputVal] = useState('')
-    const [inputType,setInputType] = useState('')
-    const handelClick=()=>{
-        setIsOpen(!isOpen)
-    }
-    const handelAddFolder=()=>{
-        setInputType('folder')
-        setISShowAddInput(true)
-    }
-    const handelAddFile=()=>{
-        setInputType('file')
-        setISShowAddInput(true)
-    }
-    const handelOnchange=(e)=>{
-        setInputVal(e.target.value)
-    }
-   const handelOnblur=()=>{
-       setInputVal('')
-       setISShowAddInput(false)
-    }
-    const handelSubmit=(e)=>{
-        e.preventDefault()
-        if(inputType === 'edit'){
-            handelEdit(data.id,inputVal)
-        }else{
-            HandelAdd(data.id,data,inputVal,inputType ==='folder')
+const FolderItem = ({ data, HandelAdd, handelDelete, handelEdit }) => {
+    const [isShowAddInput, setIsShowAddInput] = useState(false);
+    const [inputVal, setInputVal] = useState("");
+    const [inputType, setInputType] = useState("");
+
+    const handelAddFolder = () => {
+        setInputType("folder");
+        setIsShowAddInput(true);
+    };
+
+    const handelAddFile = () => {
+        setInputType("file");
+        setIsShowAddInput(true);
+    };
+
+    const handelOnchange = (e) => {
+        setInputVal(e.target.value);
+    };
+
+    const handelOnblur = () => {
+        setInputVal("");
+        setIsShowAddInput(false);
+    };
+
+    const handelSubmit = (e) => {
+        e.preventDefault();
+        if (inputType === "edit") {
+            handelEdit(data.id, inputVal);
+        } else {
+            HandelAdd(data.id, data, inputVal, inputType === "folder");
         }
-       handelOnblur()
-    }
-    const deleteFn=()=>{
-        handelDelete(data)
-    }
-    const editFn=()=>{
-        setInputType('edit')
-        setISShowAddInput(true)
-    }
+        handelOnblur();
+    };
 
     return (
-        < >
-            <div className="container">
-             <img style={{width:'20px', height:'20px', paddingLeft:'5px'}} src={data.isFolder ? folderLogo : fileLogo} alt="logo" />
-            <span  onClick={handelClick}>{data.name}</span>
-            {  data.isFolder &&<><button className="actionBtn" onClick={handelAddFolder} type="button">AddFolder</button>
-            <button className="actionBtn" onClick={handelAddFile} type="button">AddFile</button></>}
-            <button style={{backgroundColor:'yellow'}} className="actionBtn"  onClick={editFn}>Edit </button>
-            <button style={{backgroundColor:'red'}} className="actionBtn"  onClick={deleteFn}>Delete </button>
-            </div>
-            {isShowAddInput &&  <form onSubmit={handelSubmit}> <input autoFocus type="text" onBlur={handelOnblur} value={inputVal} onChange={handelOnchange} /> </form>}
-            <div  style={{paddingLeft:'15px'}}>
-            {
-               isOpen && data.isFolder && data.item.map((item,index)=>( 
-                <span  style={{paddingLeft:'15px'}} key={index}><FolderItem handelEdit={handelEdit} handelDelete={handelDelete} HandelAdd={HandelAdd} data={item}/></span>
-               ))           
+        <Collapse defaultActiveKey={[]} ghost>
+            <Panel 
+                header={
+                    <Space>
+                        {data.isFolder ? <FolderOutlined style={{ color: "#faad14" }} /> : <FileOutlined style={{ color: "#1890ff" }} />}
+                        <Text strong>{data.name}</Text>
+                    </Space>
                 }
-            </div>
-        </>
+                key={data.id}
+            >
+                <Space wrap>
+                    {data.isFolder && (
+                        <>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={handelAddFolder}>
+                                Add Folder
+                            </Button>
+                            <Button type="default" icon={<PlusOutlined />} onClick={handelAddFile}>
+                                Add File
+                            </Button>
+                        </>
+                    )}
+                    <Button type="dashed" icon={<EditOutlined />} onClick={() => setInputType("edit") || setIsShowAddInput(true)}>
+                        Edit
+                    </Button>
+                  { data.id != 1 && <Button danger type="primary" icon={<DeleteOutlined />} onClick={() => handelDelete(data)}>
+                        Delete
+                    </Button>}
+                </Space>
+
+                {isShowAddInput && (
+                    <form onSubmit={handelSubmit} style={{ marginTop: "10px" }}>
+                        <Input autoFocus type="text" onBlur={handelOnblur} value={inputVal} onChange={handelOnchange} />
+                    </form>
+                )}
+
+                <div style={{ paddingLeft: "20px", marginTop: "10px" }}>
+                    {data.isFolder && data.item.map((item, index) => (
+                        <FolderItem key={index} handelEdit={handelEdit} handelDelete={handelDelete} HandelAdd={HandelAdd} data={item} />
+                    ))}
+                </div>
+            </Panel>
+        </Collapse>
     );
-}
+};
 
 export default FolderItem;
